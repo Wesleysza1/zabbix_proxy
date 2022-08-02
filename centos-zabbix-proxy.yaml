@@ -28,7 +28,8 @@
     #  shell: sudo firewall-cmd --add-service={http,https} --permanent
 
     - name: Open port
-      become: firewall-cmd --add-port={10051/tcp,10050/tcp} --permanent
+      become: true
+      shell: firewall-cmd --add-port={10051/tcp,10050/tcp} --permanent
 
     - name: Reaload Firewall
       become: true
