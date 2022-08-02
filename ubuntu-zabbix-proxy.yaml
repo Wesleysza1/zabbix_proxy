@@ -91,6 +91,7 @@
       shell: pip3 install zabbix-api
 
     - name: Criando Proxy no Server
+      ignore_errors: yes
       local_action:
         module: zabbix_proxy
         server_url: "{{ urlserver }}"
