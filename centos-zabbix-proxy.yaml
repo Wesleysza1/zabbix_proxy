@@ -8,7 +8,7 @@
       register: hip
 
     # INSTALANDO BANCO DE DADOS
-    - name: Installign Mariadb
+    - name: Installing Mariadb
       shell: sudo dnf install mariadb-server
     
     - name: Starting Mariadb
