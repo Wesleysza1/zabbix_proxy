@@ -6,10 +6,10 @@ ConfigFrequency: 60 #time in seconds
  
 login_user: Admin
 login_password: zabbix
-host_name: ProxyCentos-host
-host_groups: Linux servers
-link_templates: Linux by Zabbix agent
 proxy_name: ProxyCentos
 db_name: zabbix_proxy
 db_user: zabbix
 db_password: password
+#host_name: ProxyCentos-host
+#host_groups: Linux servers
+#link_templates: Linux by Zabbix agent
