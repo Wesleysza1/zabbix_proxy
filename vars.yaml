@@ -1,0 +1,15 @@
+urlserver: http://13.57.7.254/zabbix 
+server: 172.31.114.108 
+serverActive: 172.31.114.108
+proxymode: 0 # 0 = active, 1 =passive
+ConfigFrequency: 60 #time in seconds
+ 
+login_user: Admin
+login_password: zabbix
+host_name: ProxySuse-host
+host_groups: Linux servers
+link_templates: Linux by Zabbix agent
+proxy_name: ProxySuse
+db_name: zabbix_proxy
+db_user: zabbix
+db_password: password

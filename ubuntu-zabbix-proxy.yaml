@@ -1,0 +1,110 @@
+---
+- hosts: localhost
+  become: true
+  vars_files: vars.yaml
+  tasks:
+    - name: Registro de IP
+      shell: hostname -I | awk '{print $1}'
+      register: hip
+
+    # INSTALAÇÃO PROXY
+    - name: Download Repo Zabbix Proxy
+      shell: wget https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.0-3+ubuntu$(lsb_release -rs)_all.deb
+    
+    - name: Installing repo Zabbix Proxy
+      become: true
+      shell: dpkg -i zabbix-release_6.0-3+ubuntu$(lsb_release -rs)_all.deb
+
+    - name: Updating Repos
+      become: true
+      shell: apt update
+    
+    - name: Installing Proxy and DB
+      become: true
+      shell: apt -y install zabbix-proxy-mysql zabbix-sql-scripts mysql-server mysql-client software-properties-common
+    
+    - name: Instalando Pip
+      become: true
+      shell: apt install python3-pip -y
+
+    - name: Creating DB
+      become: true
+      shell: mysql -uroot -e "create database {{ db_name }} character set utf8mb4 collate utf8mb4_bin;"
+
+    - name: Creating DB User
+      become: true
+      shell: mysql -uroot -e "create user {{ db_user }}@localhost identified by '{{ db_password }}';"
+
+    - name: DbUser Priveleges
+      become: true
+      shell: mysql -uroot -e "grant all privileges on {{ db_name }}.* to {{ db_user }}@localhost;"
+
+    - name: Refresh DB
+      shell: mysql -uroot -e "flush privileges;"
+    
+    - name: Importing DB Schema
+      become: true
+      shell: cat /usr/share/doc/zabbix-sql-scripts/mysql/proxy.sql | mysql -u{{ db_user }} -p {{ db_name }}
+
+    - name: Adding Proxy Mode
+      become: true
+      shell: sed -i.bkp '13c\ProxyMode={{ proxymode }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding ConfigFrequency
+      become: true
+      shell: sed -i.bkp '14c\ConfigFrequency={{ ConfigFrequency }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding Server
+      become: true
+      shell: sed -i.bkp '32c\Server={{ server }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding Hostname
+      become: true
+      shell: sed -i.bkp '42c\Hostname={{ proxy_name }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding DbName
+      become: true
+      shell: sed -i.bkp '171c\DBName={{ db_name }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding DBUser
+      become: true
+      shell: sed -i.bkp '186c\DBUser={{ db_user }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding DBPassword
+      become: true
+      shell: sed -i.bkp '194c\DBPassword={{ db_password }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding DBAllow #for supporting mysql5.0
+      become: true
+      shell: sed -i.bkp '219c\AllowUnsupportedDBVersions=1' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Restartar Service
+      become: true
+      shell: systemctl restart zabbix-proxy
+
+    - name: Habilitar Service
+      become: true
+      shell: systemctl enable zabbix-proxy
+    
+    - name: Install Zabbix-api
+      become: true
+      shell: pip3 install zabbix-api
+
+    - name: Criando Proxy no Server
+      local_action:
+        module: zabbix_proxy
+        server_url: "{{ urlserver }}"
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        proxy_name: "{{ proxy_name }}"
+        #description: ExampleProxy
+        status: active # active or passive
+        state: present
+        timeout: 10
+        interface:
+            type: 0
+            main: 1
+            useip: 1
+            ip: "{{ hip.stdout }}"
+            dns: ""
+            port: 10050
