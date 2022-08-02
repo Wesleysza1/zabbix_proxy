@@ -9,7 +9,7 @@
     
     # CONFIGURING OS PERMISSIONS
     - name: Setting Setenforce
-      shell: sudo sed -i.bkp '7c\SELINUX=permissive' /etc/selinux/config
+      shell: sudo sed -i.bkp '7c\SELINUX=disabled' /etc/selinux/config
 
     - name: Instalando Firewalld
       become: true
@@ -27,7 +27,7 @@
     #  become: true
     #  shell: sudo firewall-cmd --add-service={http,https} --permanent
 
-    - name: Open port
+    - name: Open ports 10051 10050
       become: true
       shell: firewall-cmd --add-port={10051/tcp,10050/tcp} --permanent
 
@@ -42,7 +42,7 @@
     - name: Starting Mariadb
       shell: sudo systemctl start mariadb
     
-    - name: Starting Mariadb
+    - name: Enabling Mariadb
       shell: sudo systemctl enable mariadb
     
     # INSTALANDO ZABBIX PROXY
@@ -143,3 +143,7 @@
             ip: "{{ hip.stdout }}"
             dns: ""
             port: 10050
+
+    - name: Reiniciando Server
+      become: true
+      shell: sudo shutdown -r now
