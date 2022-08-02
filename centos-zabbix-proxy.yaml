@@ -6,6 +6,32 @@
     - name: Registro de IP
       shell: hostname -I | awk '{print $1}'
       register: hip
+    
+    - name: Setting Setenforce
+      shell: sudo sed -i.bkp '7c\SELINUX=permissive' /etc/selinux/config
+
+    - name: Instalando Firewalld
+      become: true
+      shell: sudo yum install firewalld -y
+
+    - name: Start Firewalld
+      become: true
+      shell: sudo systemctl start firewalld
+
+    - name: Enable Firewalld
+      become: true
+      shell: sudo systemctl enable firewalld
+
+    - name: Configurando Firewall
+      become: true
+      shell: sudo firewall-cmd --add-service={http,https} --permanent
+
+    - name: Open port
+      become: firewall-cmd --add-port={10051/tcp,10050/tcp} --permanent
+
+    - name: Reaload Firewall
+      become: true
+      shell: sudo  firewall-cmd --reload
 
     # INSTALANDO BANCO DE DADOS
     - name: Installing Mariadb
