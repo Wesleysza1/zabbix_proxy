@@ -146,8 +146,14 @@
 
     - name: Reiniciando Server
       become: true
-      shell: Shutdown -r +1 “Please save your Work, the PC will restart in 1 Minute”
+      shell: shutdown -r +1
       register: command_output
     
-    - debug:
-      var: command_output.stdout_lines
+    - name: Mensagem de shutdown
+      become: true
+      shell: echo “ATENÇÃO, O COMPUTADOR SERÁ REINICIALIZADO EM 1 MINUTO.”
+      register: alerta
+    
+    - name: ALERTA!!
+      ansible.builtin.debug:
+        msg: ATENÇÃO, O COMPUTADOR SERÁ REINICIALIZADO EM 1 MINUTO.
