@@ -44,7 +44,7 @@
     
     - name: Importing DB Schema
       become: true
-      shell: cat /usr/share/doc/zabbix-sql-scripts/mysql/proxy.sql | mysql -u{{ db_user }} -p {{ db_name }}
+      shell: cat /usr/share/doc/zabbix-sql-scripts/mysql/proxy.sql | mysql -u{{ db_user }} -p{{ db_password }} {{ db_name }}
 
     - name: Adding Proxy Mode
       become: true

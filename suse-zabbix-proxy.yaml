@@ -81,7 +81,7 @@
     
     - name: Importing db schema
       become: true
-      shell: sudo cat /usr/share/doc/packages/zabbix-sql-scripts/mysql/proxy.sql | mysql -uzabbix -p zabbix_proxy
+      shell: cat /usr/share/doc/zabbix-sql-scripts/mysql/proxy.sql | mysql -u{{ db_user }} -p{{ db_password }} {{ db_name }}
     
     - name: Setting ProxyMode
       become: true
