@@ -6,14 +6,27 @@
     - name: Registro de IP
       shell: hostname -I | awk '{print $1}'
       register: hip
+    
+    - name: Download repo Mariadb
+      shell: curl -LsS -O https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
+
+    - name: Installing repo mariadb
+      shell: sudo bash mariadb_repo_setup --mariadb-server-version=10.5
+
+    - name: Updating Repos
+      become: true
+      shell: apt update
+    
+    - name: Installing Mariadb
+      shell: apt -y install mariadb-server mariadb-client
 
     # INSTALAÇÃO PROXY
     - name: Download Repo Zabbix Proxy
-      shell: wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-3+debian11_all.deb
+      shell: wget https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-3+debian$(cut -d"." -f1 /etc/debian_version)_all.deb
     
     - name: Installing repo Zabbix Proxy
       become: true
-      shell: dpkg -i zabbix-release_6.0-3+debian11_all.deb
+      shell: dpkg -i zabbix-release_6.0-3+debian$(cut -d"." -f1 /etc/debian_version)_all.deb
 
     - name: Updating Repos
       become: true
@@ -21,7 +34,7 @@
     
     - name: Installing Proxy and DB
       become: true
-      shell: apt -y install zabbix-proxy-mysql zabbix-sql-scripts mysql-server mysql-client software-properties-common
+      shell: apt -y install zabbix-proxy-mysql zabbix-sql-scripts software-properties-common
     
     - name: Instalando Pip
       become: true
