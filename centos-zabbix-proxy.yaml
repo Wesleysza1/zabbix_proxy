@@ -37,7 +37,7 @@
 
     # INSTALANDO BANCO DE DADOS
     - name: Installing Mariadb
-      shell: sudo dnf install mariadb-server
+      shell: sudo dnf install mariadb-server -y
     
     - name: Starting Mariadb
       shell: sudo systemctl start mariadb
