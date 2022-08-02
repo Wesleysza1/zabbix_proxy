@@ -54,7 +54,7 @@
     - name: Update repos
       shell: sudo yum update -y
 
-    - name: Instalando Zabbix Agent
+    - name: Instalando Zabbix Proxy
       shell: sudo yum -y install zabbix-proxy-mysql zabbix-sql-scripts
 
     - name: Instalando Pip
