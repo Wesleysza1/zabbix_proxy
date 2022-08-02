@@ -31,9 +31,9 @@
       become: true
       shell: firewall-cmd --add-port={10051/tcp,10050/tcp} --permanent
 
-    - name: Reaload Firewall
+    - name: Reload Firewall
       become: true
-      shell: sudo  firewall-cmd --reload
+      shell: firewall-cmd --reload
 
     # INSTALANDO BANCO DE DADOS
     - name: Installing Mariadb
