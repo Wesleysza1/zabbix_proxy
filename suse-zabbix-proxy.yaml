@@ -7,6 +7,13 @@
       shell: hostname -I | awk '{print $1}'
       register: hip
 
+    - name: Generating DBPassword
+      local_action: copy content={{ db_password }} dest=./dbpassword.txt
+
+    - name: Register DBPassword in var
+      shell: cat dbpassword.txt
+      register: dbpassword
+
     #INSTALAÇÃO BANCO DE DADOS
     - name: Download repo MariaDB
       become: true
@@ -65,15 +72,15 @@
 
     - name: Criando database zabbix_proxy
       become: true
-      shell: sudo mysql -uroot -e "create database zabbix_proxy character set utf8mb4 collate utf8mb4_bin;"
+      shell: sudo mysql -uroot -e "create database {{ db_name }} character set utf8mb4 collate utf8mb4_bin;"
 
     - name: Criando dbuser zabbix
       become: true
-      shell: sudo mysql -uroot -e "create user zabbix@localhost identified by 'password';"
+      shell: sudo mysql -uroot -e "create user zabbix@localhost identified by '{{ dbpassword.stdout }}';"
 
     - name: Granting Privileges of dbuser zabbix
       become: true
-      shell: sudo mysql -uroot -e "grant all privileges on zabbix_proxy.* to zabbix@localhost;"
+      shell: sudo mysql -uroot -e "grant all privileges on {{ db_name }}.* to {{ db_user }}@localhost;"
 
     - name: Refresh db
       become: true
@@ -81,35 +88,39 @@
     
     - name: Importing db schema
       become: true
-      shell: cat /usr/share/doc/zabbix-sql-scripts/mysql/proxy.sql | mysql -u{{ db_user }} -p{{ db_password }} {{ db_name }}
+      shell: cat /usr/share/doc/zabbix-sql-scripts/mysql/proxy.sql | mysql -u{{ db_user }} -p{{ dbpassword.stdout }} {{ db_name }}
     
-    - name: Setting ProxyMode
+    - name: Adding Proxy Mode
       become: true
-      shell: sudo sed -i.bkp '13c\ProxyMode=0' /etc/zabbix/zabbix_proxy.conf
-    
-    - name: Setting ConfigFrequency
+      shell: sed -i.bkp '13c\ProxyMode={{ proxymode }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding ConfigFrequency
       become: true
-      shell: sudo sed -i.bkp '14c\ConfigFrequency=60' /etc/zabbix/zabbix_proxy.conf
-    
-    - name: Setting Server
+      shell: sed -i.bkp '14c\ConfigFrequency={{ ConfigFrequency }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding Server
       become: true
-      shell: sudo sed -i.bkp '32c\Server=172.31.114.108' /etc/zabbix/zabbix_proxy.conf
-    
-    - name: Setting Hostname
+      shell: sed -i.bkp '32c\Server={{ server }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding Hostname
       become: true
-      shell: sudo sed -i.bkp '42c\Hostname=ProxySuse' /etc/zabbix/zabbix_proxy.conf
-    
-    - name: Setting DBName
+      shell: sed -i.bkp '42c\Hostname={{ proxy_name }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding DbName
       become: true
-      shell: sudo sed -i.bkp '171c\DBName=zabbix_proxy' /etc/zabbix/zabbix_proxy.conf
-    
-    - name: Setting DBUser
+      shell: sed -i.bkp '171c\DBName={{ db_name }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding DBUser
       become: true
-      shell: sudo sed -i.bkp '186c\DBUser=zabbix' /etc/zabbix/zabbix_proxy.conf
-    
-    - name: Setting DBPassword
+      shell: sed -i.bkp '186c\DBUser={{ db_user }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding DBPassword
       become: true
-      shell: sudo sed -i.bkp '194c\DBPassword=password' /etc/zabbix/zabbix_proxy.conf
+      shell: sed -i.bkp '194c\DBPassword={{ dbpassword.stdout }}' /etc/zabbix/zabbix_proxy.conf
+
+    - name: Adding DBAllow #for supporting mysql5.0
+      become: true
+      shell: sed -i.bkp '219c\AllowUnsupportedDBVersions=1' /etc/zabbix/zabbix_proxy.conf
 
     - name: Restartar Service
       become: true

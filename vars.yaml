@@ -1,4 +1,4 @@
-urlserver: http://54.241.46.62/zabbix 
+urlserver: http://3.101.127.129/zabbix 
 server: 172.31.114.108 
 serverActive: 172.31.114.108
 proxymode: 0 # 0 = active, 1 =passive
@@ -9,7 +9,7 @@ login_password: zabbix
 proxy_name: UbuntuProxy
 db_name: zabbix_proxy
 db_user: zabbix
-db_password: password
-#host_name: ProxyCentos-host
-#host_groups: Linux servers
-#link_templates: Linux by Zabbix agent
+db_password: "{{ lookup('community.general.random_string', length=16, special=false) }}"
+host_name: Ubuntu
+host_groups: Linux servers
+link_templates: Linux by Zabbix agent

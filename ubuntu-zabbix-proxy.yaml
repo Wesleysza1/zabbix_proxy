@@ -6,6 +6,13 @@
     - name: Registro de IP
       shell: hostname -I | awk '{print $1}'
       register: hip
+    
+    - name: Generating DBPassword
+      local_action: copy content={{ db_password }} dest=./dbpassword.txt
+
+    - name: Register DBPassword in var
+      shell: cat dbpassword.txt
+      register: dbpassword
 
     # INSTALAÇÃO PROXY
     - name: Download Repo Zabbix Proxy
@@ -33,7 +40,7 @@
 
     - name: Creating DB User
       become: true
-      shell: mysql -uroot -e "create user {{ db_user }}@localhost identified by '{{ db_password }}';"
+      shell: mysql -uroot -e "create user {{ db_user }}@localhost identified by '{{ dbpassword.stdout }}';"
 
     - name: DbUser Priveleges
       become: true
@@ -44,7 +51,7 @@
     
     - name: Importing DB Schema
       become: true
-      shell: cat /usr/share/doc/zabbix-sql-scripts/mysql/proxy.sql | mysql -u{{ db_user }} -p{{ db_password }} {{ db_name }}
+      shell: cat /usr/share/doc/zabbix-sql-scripts/mysql/proxy.sql | mysql -u{{ db_user }} -p{{ dbpassword.stdout }} {{ db_name }}
 
     - name: Adding Proxy Mode
       become: true
@@ -72,7 +79,7 @@
 
     - name: Adding DBPassword
       become: true
-      shell: sed -i.bkp '194c\DBPassword={{ db_password }}' /etc/zabbix/zabbix_proxy.conf
+      shell: sed -i.bkp '194c\DBPassword={{ dbpassword.stdout }}' /etc/zabbix/zabbix_proxy.conf
 
     - name: Adding DBAllow #for supporting mysql5.0
       become: true
